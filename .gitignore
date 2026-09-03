@@ -1,0 +1,27 @@
+# Ambientes virtuais
+.venv/
+venv/
+ENV/
+
+# Python cache e compilação
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Variáveis de ambiente com dados sensíveis
+.env
+!.env.example
+
+# Testes e cobertura
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Banco de dados local/sqlite (se houver)
+*.sqlite3
+*.db
+
+# IDEs
+.vscode/
+.idea/
