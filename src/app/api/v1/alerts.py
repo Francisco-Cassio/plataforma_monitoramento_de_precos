@@ -9,7 +9,12 @@ from app.services.alert_service import AlertService
 router = APIRouter()
 
 
-@router.post("/", response_model=AlertResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/",
+    response_model=AlertResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Criar alerta de preço para um produto",
+)
 async def create_alert(
     alert_in: AlertCreate,
     current_user: User = Depends(get_current_user),
@@ -21,7 +26,11 @@ async def create_alert(
     return await service.create_alert(alert_in=alert_in, user_id=current_user.id)
 
 
-@router.get("/", response_model=List[AlertResponse])
+@router.get(
+    "/",
+    response_model=List[AlertResponse],
+    summary="Listar meus alertas de preço",
+)
 async def list_my_alerts(
     current_user: User = Depends(get_current_user),
     service: AlertService = Depends(get_alert_service),
@@ -32,7 +41,11 @@ async def list_my_alerts(
     return await service.list_alerts(user_id=current_user.id)
 
 
-@router.delete("/{alert_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{alert_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Remover alerta de preço",
+)
 async def delete_alert(
     alert_id: int,
     current_user: User = Depends(get_current_user),

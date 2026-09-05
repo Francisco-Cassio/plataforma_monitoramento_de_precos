@@ -10,7 +10,12 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 router = APIRouter()
 
-@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/register",
+    response_model=UserResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Cadastrar novo usuário",
+)
 async def register_user(user_in: UserCreate, auth_service: AuthService = Depends(get_user_service)):
     """
     Endpoint para registrar um novo usuário.
@@ -19,7 +24,7 @@ async def register_user(user_in: UserCreate, auth_service: AuthService = Depends
     return user
 
 
-@router.post("/login", response_model=Token)
+@router.post("/login", response_model=Token, summary="Realizar login e obter token")
 async def login_user(
     form_data: OAuth2PasswordRequestForm = Depends(),
     auth_service: AuthService = Depends(get_user_service),
@@ -39,7 +44,7 @@ async def login_user(
     return token
 
 
-@router.get("/me", response_model=UserResponse)
+@router.get("/me", response_model=UserResponse, summary="Obter dados do usuário logado")
 async def get_current_user_info(current_user: User = Depends(get_current_user)):
     """
     Endpoint para obter informações do usuário atualmente autenticado.

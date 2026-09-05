@@ -23,7 +23,7 @@ app.add_middleware(
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
 
-@app.get("/health", tags=["Health"])
+@app.get("/health", tags=["Saúde da API"], summary="Checagem de integridade da API")
 async def health_check():
     """Endpoint de checagem de saúde da aplicação"""
     return {
