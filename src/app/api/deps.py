@@ -8,6 +8,10 @@ from app.core.database import get_db
 from app.models.user import User, UserRole
 from app.repositories.user_repository import UserRepository
 from app.services.auth_service import AuthService
+from app.repositories.alert_repository import AlertRepository
+from app.repositories.product_repository import ProductRepository
+from app.services.alert_service import AlertService
+from app.services.product_service import ProductService
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_V1_STR}/auth/login"
@@ -59,3 +63,13 @@ async def get_current_active_admin(current_user: User = Depends(get_current_user
             detail="Acesso negado. Usuário não é administrador.",
         )
     return current_user
+
+def get_product_service(db: AsyncSession = Depends(get_db)) -> ProductService:
+    product_repo = ProductRepository(db)
+    alert_repo = AlertRepository(db)
+    return ProductService(product_repo, alert_repo)
+
+def get_alert_service(db: AsyncSession = Depends(get_db)) -> AlertService:
+    alert_repo = AlertRepository(db)
+    product_repo = ProductRepository(db)
+    return AlertService(alert_repo, product_repo)
