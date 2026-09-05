@@ -21,5 +21,6 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "sua_chave_secreta_super_segura_aqui_para_desenvolvimento"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
 settings = Settings()
