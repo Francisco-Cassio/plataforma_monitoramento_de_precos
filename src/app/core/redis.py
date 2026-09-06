@@ -6,7 +6,7 @@ from typing import AsyncGenerator, Optional
 import redis.asyncio as aioredis
 from redis.exceptions import LockError
 
-from src.app.core.config import settings
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
