@@ -1,0 +1,18 @@
+# Ambiente Virtuais
+.venv
+venv
+__pycache__
+*.pyc
+*.pyo
+
+# Arquivos de controle de versão
+.git
+.gitignore
+
+# Testes e relatórios de cobertura locais
+.pytest_cache
+.coverage
+htmlcov
+
+# Arquivos de variáveis locais
+.env
