@@ -26,16 +26,16 @@
         <!-- Formulário de Login -->
         <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
             <div class="space-y-1.5">
-                <label class="block text-[11px] font-medium uppercase tracking-wider text-zinc-400">E-mail</label>
-                <input type="email" id="login-email" required placeholder="nome@exemplo.com" class="w-full px-3 py-2.5 bg-zinc-900/60 border border-white/[0.08] rounded-xl text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20 text-xs transition">
+                <label class="block text-xs font-medium text-zinc-300">E-mail</label>
+                <input type="email" id="login-email" required placeholder="nome@exemplo.com" class="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-white/[0.08] rounded-xl text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-white/25 focus:ring-1 focus:ring-white/20 text-xs transition">
             </div>
 
             <div class="space-y-1.5">
-                <label class="block text-[11px] font-medium uppercase tracking-wider text-zinc-400">Senha</label>
-                <input type="password" id="login-password" required placeholder="••••••••" class="w-full px-3 py-2.5 bg-zinc-900/60 border border-white/[0.08] rounded-xl text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20 text-xs transition">
+                <label class="block text-xs font-medium text-zinc-300">Senha</label>
+                <input type="password" id="login-password" required placeholder="••••••••" class="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-white/[0.08] rounded-xl text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-white/25 focus:ring-1 focus:ring-white/20 text-xs transition">
             </div>
 
-            <button type="submit" id="login-submit-btn" class="w-full py-2.5 px-4 bg-white hover:bg-zinc-200 text-zinc-950 font-semibold rounded-xl text-xs uppercase tracking-wider transition active:scale-[0.98] shadow-sm flex items-center justify-center space-x-2">
+            <button type="submit" id="login-submit-btn" class="w-full py-2.5 px-4 bg-white hover:bg-zinc-200 text-zinc-950 font-semibold rounded-xl text-xs transition active:scale-[0.98] shadow-sm flex items-center justify-center space-x-2">
                 <span>Entrar no Vigia</span>
                 <i class="fa-solid fa-arrow-right text-[10px]"></i>
             </button>
@@ -44,16 +44,16 @@
         <!-- Formulário de Cadastro -->
         <form id="register-form" onsubmit="handleRegister(event)" class="space-y-4 hidden">
             <div class="space-y-1.5">
-                <label class="block text-[11px] font-medium uppercase tracking-wider text-zinc-400">E-mail</label>
-                <input type="email" id="register-email" required placeholder="nome@exemplo.com" class="w-full px-3 py-2.5 bg-zinc-900/60 border border-white/[0.08] rounded-xl text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20 text-xs transition">
+                <label class="block text-xs font-medium text-zinc-300">E-mail</label>
+                <input type="email" id="register-email" required placeholder="nome@exemplo.com" class="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-white/[0.08] rounded-xl text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-white/25 focus:ring-1 focus:ring-white/20 text-xs transition">
             </div>
 
             <div class="space-y-1.5">
-                <label class="block text-[11px] font-medium uppercase tracking-wider text-zinc-400">Senha (mínimo 6 caracteres)</label>
-                <input type="password" id="register-password" minlength="6" required placeholder="Mínimo 6 caracteres" class="w-full px-3 py-2.5 bg-zinc-900/60 border border-white/[0.08] rounded-xl text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20 text-xs transition">
+                <label class="block text-xs font-medium text-zinc-300">Senha (mínimo 6 caracteres)</label>
+                <input type="password" id="register-password" minlength="6" required placeholder="Mínimo 6 caracteres" class="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-white/[0.08] rounded-xl text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-white/25 focus:ring-1 focus:ring-white/20 text-xs transition">
             </div>
 
-            <button type="submit" id="register-submit-btn" class="w-full py-2.5 px-4 bg-white hover:bg-zinc-200 text-zinc-950 font-semibold rounded-xl text-xs uppercase tracking-wider transition active:scale-[0.98] shadow-sm flex items-center justify-center space-x-2">
+            <button type="submit" id="register-submit-btn" class="w-full py-2.5 px-4 bg-white hover:bg-zinc-200 text-zinc-950 font-semibold rounded-xl text-xs transition active:scale-[0.98] shadow-sm flex items-center justify-center space-x-2">
                 <span>Criar Conta</span>
                 <i class="fa-solid fa-check text-[10px]"></i>
             </button>
@@ -121,7 +121,7 @@
         } catch (err) {
             showToast(err.message, 'error');
             btn.disabled = false;
-            btn.innerHTML = '<span>Entrar no Radar</span><i class="fa-solid fa-arrow-right text-[10px]"></i>';
+            btn.innerHTML = '<span>Entrar no Vigia</span><i class="fa-solid fa-arrow-right text-[10px]"></i>';
         }
     }
 

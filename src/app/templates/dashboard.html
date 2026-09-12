@@ -8,25 +8,25 @@
     <!-- Barra de Métricas Integrada (Stat Strip) -->
     <div class="bg-[#121215] border border-white/[0.08] rounded-2xl p-5 grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-0 sm:divide-x sm:divide-white/[0.06]">
         <div class="sm:px-5 first:pl-0 flex flex-col justify-center">
-            <span class="text-[11px] font-medium uppercase tracking-wider text-zinc-400">Total Monitorado</span>
+            <span class="text-xs font-medium text-zinc-400">Total monitorado</span>
             <div class="flex items-baseline space-x-2 mt-1">
-                <span id="metric-total" class="text-3xl font-mono font-semibold tracking-tight text-white">0</span>
+                <span id="metric-total" class="text-3xl font-mono font-semibold tracking-tight text-white tabular-nums">0</span>
                 <span class="text-xs text-zinc-500">produtos ativos</span>
             </div>
         </div>
 
         <div class="sm:px-5 flex flex-col justify-center">
-            <span class="text-[11px] font-medium uppercase tracking-wider text-zinc-400">Em Estoque</span>
+            <span class="text-xs font-medium text-zinc-400">Em estoque</span>
             <div class="flex items-baseline space-x-2 mt-1">
-                <span id="metric-in-stock" class="text-3xl font-mono font-semibold tracking-tight text-emerald-400">0</span>
+                <span id="metric-in-stock" class="text-3xl font-mono font-semibold tracking-tight text-emerald-400 tabular-nums">0</span>
                 <span class="text-xs text-zinc-500">disponíveis</span>
             </div>
         </div>
 
         <div class="sm:px-5 last:pr-0 flex flex-col justify-center">
-            <span class="text-[11px] font-medium uppercase tracking-wider text-zinc-400">Alertas de Preço</span>
+            <span class="text-xs font-medium text-zinc-400">Alertas de preço</span>
             <div class="flex items-baseline space-x-2 mt-1">
-                <span id="metric-alerts" class="text-3xl font-mono font-semibold tracking-tight text-white">0</span>
+                <span id="metric-alerts" class="text-3xl font-mono font-semibold tracking-tight text-white tabular-nums">0</span>
                 <span class="text-xs text-zinc-500">armados</span>
             </div>
             <div class="flex items-center space-x-1.5 mt-1.5">
@@ -40,32 +40,28 @@
     <div class="bg-[#121215] border border-white/[0.08] rounded-2xl p-6 shadow-sm">
         <div class="mb-4">
             <h2 class="text-sm font-semibold tracking-tight text-white flex items-center gap-2">
-                <span>Rastrear Novo Produto</span>
+                <span>Rastrear novo produto</span>
             </h2>
             <p class="text-xs text-zinc-400 mt-0.5">Cole a URL de um produto em lojas e e-commerces compatíveis</p>
         </div>
 
-        <form id="add-product-form" onsubmit="handleAddProduct(event)" class="grid grid-cols-1 lg:grid-cols-12 gap-3">
-            <div class="lg:col-span-8">
-                <div class="relative">
-                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-zinc-500 text-xs">
-                        <i class="fa-solid fa-link"></i>
-                    </span>
-                    <input type="url" id="product-url" required placeholder="https://... (Mercado Livre, Amazon, Magalu, Kabum ou outros)" class="w-full pl-9 pr-4 py-2.5 bg-zinc-900/70 border border-white/[0.08] rounded-xl text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20 text-xs transition font-mono">
-                </div>
+        <form id="add-product-form" onsubmit="handleAddProduct(event)" class="flex flex-col sm:flex-row gap-2.5 items-stretch">
+            <div class="relative flex-1">
+                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-zinc-500 text-xs">
+                    <i class="fa-solid fa-link"></i>
+                </span>
+                <input type="url" id="product-url" required placeholder="https://... (Mercado Livre, Amazon, Magalu, Kabum ou outros)" class="w-full pl-9 pr-4 py-2.5 bg-zinc-900/70 border border-white/[0.08] rounded-xl text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20 text-xs transition font-mono">
             </div>
 
-            <div class="lg:col-span-2">
-                <div class="relative">
-                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-zinc-500 text-xs font-mono">
-                        R$
-                    </span>
-                    <input type="number" step="0.01" min="0" id="product-target-price" placeholder="Alvo (opcional)" class="w-full pl-9 pr-3 py-2.5 bg-zinc-900/70 border border-white/[0.08] rounded-xl text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20 text-xs transition font-mono">
-                </div>
+            <div class="relative sm:w-44">
+                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-zinc-500 text-xs font-mono">
+                    R$
+                </span>
+                <input type="number" step="0.01" min="0" id="product-target-price" placeholder="Alvo (opcional)" class="w-full pl-9 pr-3 py-2.5 bg-zinc-900/70 border border-white/[0.08] rounded-xl text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20 text-xs transition font-mono tabular-nums">
             </div>
 
-            <div class="lg:col-span-2">
-                <button type="submit" id="add-product-btn" class="w-full h-full py-2.5 px-4 bg-white hover:bg-zinc-200 text-zinc-950 font-semibold rounded-xl text-xs uppercase tracking-wider transition active:scale-[0.98] shadow-sm flex items-center justify-center space-x-2">
+            <div>
+                <button type="submit" id="add-product-btn" class="w-full sm:w-auto h-full py-2.5 px-5 bg-white hover:bg-zinc-200 text-zinc-950 font-medium rounded-xl text-xs transition active:scale-[0.98] shadow-sm flex items-center justify-center space-x-2">
                     <i class="fa-solid fa-plus text-[10px]"></i>
                     <span>Rastrear</span>
                 </button>
@@ -88,7 +84,64 @@
 
         <!-- Grade de Produtos -->
         <div id="products-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            <!-- Os cards são gerados dinamicamente via JavaScript -->
+            <!-- Skeleton loading inicial de alta fidelidade -->
+            <div class="bg-[#121215] border border-white/[0.08] rounded-2xl p-5 space-y-4 animate-pulse">
+                <div class="flex justify-between items-center">
+                    <div class="h-4 w-24 bg-white/[0.06] rounded-md"></div>
+                    <div class="h-4 w-16 bg-white/[0.06] rounded-md"></div>
+                </div>
+                <div class="space-y-2">
+                    <div class="h-4 w-full bg-white/[0.06] rounded-md"></div>
+                    <div class="h-4 w-3/4 bg-white/[0.06] rounded-md"></div>
+                </div>
+                <div class="pt-3 border-t border-white/[0.04] grid grid-cols-2 gap-2">
+                    <div class="h-7 w-24 bg-white/[0.06] rounded-md"></div>
+                    <div class="h-7 w-20 bg-white/[0.06] rounded-md justify-self-end"></div>
+                </div>
+                <div class="pt-4 border-t border-white/[0.06] flex gap-2">
+                    <div class="h-8 flex-1 bg-white/[0.06] rounded-lg"></div>
+                    <div class="h-8 w-9 bg-white/[0.06] rounded-lg"></div>
+                    <div class="h-8 w-9 bg-white/[0.06] rounded-lg"></div>
+                </div>
+            </div>
+            <div class="bg-[#121215] border border-white/[0.08] rounded-2xl p-5 space-y-4 animate-pulse hidden sm:block">
+                <div class="flex justify-between items-center">
+                    <div class="h-4 w-24 bg-white/[0.06] rounded-md"></div>
+                    <div class="h-4 w-16 bg-white/[0.06] rounded-md"></div>
+                </div>
+                <div class="space-y-2">
+                    <div class="h-4 w-full bg-white/[0.06] rounded-md"></div>
+                    <div class="h-4 w-3/4 bg-white/[0.06] rounded-md"></div>
+                </div>
+                <div class="pt-3 border-t border-white/[0.04] grid grid-cols-2 gap-2">
+                    <div class="h-7 w-24 bg-white/[0.06] rounded-md"></div>
+                    <div class="h-7 w-20 bg-white/[0.06] rounded-md justify-self-end"></div>
+                </div>
+                <div class="pt-4 border-t border-white/[0.06] flex gap-2">
+                    <div class="h-8 flex-1 bg-white/[0.06] rounded-lg"></div>
+                    <div class="h-8 w-9 bg-white/[0.06] rounded-lg"></div>
+                    <div class="h-8 w-9 bg-white/[0.06] rounded-lg"></div>
+                </div>
+            </div>
+            <div class="bg-[#121215] border border-white/[0.08] rounded-2xl p-5 space-y-4 animate-pulse hidden lg:block">
+                <div class="flex justify-between items-center">
+                    <div class="h-4 w-24 bg-white/[0.06] rounded-md"></div>
+                    <div class="h-4 w-16 bg-white/[0.06] rounded-md"></div>
+                </div>
+                <div class="space-y-2">
+                    <div class="h-4 w-full bg-white/[0.06] rounded-md"></div>
+                    <div class="h-4 w-3/4 bg-white/[0.06] rounded-md"></div>
+                </div>
+                <div class="pt-3 border-t border-white/[0.04] grid grid-cols-2 gap-2">
+                    <div class="h-7 w-24 bg-white/[0.06] rounded-md"></div>
+                    <div class="h-7 w-20 bg-white/[0.06] rounded-md justify-self-end"></div>
+                </div>
+                <div class="pt-4 border-t border-white/[0.06] flex gap-2">
+                    <div class="h-8 flex-1 bg-white/[0.06] rounded-lg"></div>
+                    <div class="h-8 w-9 bg-white/[0.06] rounded-lg"></div>
+                    <div class="h-8 w-9 bg-white/[0.06] rounded-lg"></div>
+                </div>
+            </div>
         </div>
 
         <!-- Estado Vazio (Zero produtos) -->
@@ -108,7 +161,7 @@
         
         <div class="flex items-start justify-between border-b border-white/[0.06] pb-4">
             <div class="space-y-1">
-                <span class="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-white/[0.05] border border-white/[0.08] text-zinc-400 font-medium">Histórico Cronológico</span>
+                <span class="text-[10px] font-mono tracking-wider px-2 py-0.5 rounded bg-white/[0.05] border border-white/[0.08] text-zinc-400 font-medium">Histórico cronológico</span>
                 <h3 id="modal-product-title" class="text-sm font-semibold text-white line-clamp-1">Produto</h3>
             </div>
             <button onclick="closeModal()" class="w-7 h-7 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-zinc-400 hover:text-white flex items-center justify-center transition">
@@ -119,20 +172,20 @@
         <!-- Resumo Rápido no Modal: 4 Colunas -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-zinc-900/60 border border-white/[0.06] rounded-xl p-3 text-center">
             <div>
-                <span class="text-[10px] uppercase font-mono tracking-wider text-zinc-500 block">Menor Preço</span>
-                <span id="modal-min-price" class="text-sm font-mono font-semibold text-emerald-400 mt-0.5 block">-</span>
+                <span class="text-[10px] font-mono text-zinc-500 block">Menor preço</span>
+                <span id="modal-min-price" class="text-sm font-mono font-semibold text-emerald-400 mt-0.5 block tabular-nums">-</span>
             </div>
             <div>
-                <span class="text-[10px] uppercase font-mono tracking-wider text-zinc-500 block">Maior Preço</span>
-                <span id="modal-max-price" class="text-sm font-mono font-semibold text-rose-400 mt-0.5 block">-</span>
+                <span class="text-[10px] font-mono text-zinc-500 block">Maior preço</span>
+                <span id="modal-max-price" class="text-sm font-mono font-semibold text-rose-400 mt-0.5 block tabular-nums">-</span>
             </div>
             <div>
-                <span class="text-[10px] uppercase font-mono tracking-wider text-zinc-500 block">Preço Atual</span>
-                <span id="modal-curr-price" class="text-sm font-mono font-semibold text-white mt-0.5 block">-</span>
+                <span class="text-[10px] font-mono text-zinc-500 block">Preço atual</span>
+                <span id="modal-curr-price" class="text-sm font-mono font-semibold text-white mt-0.5 block tabular-nums">-</span>
             </div>
             <div>
-                <span class="text-[10px] uppercase font-mono tracking-wider text-zinc-500 block">Preço-Alvo</span>
-                <span id="modal-target-price" class="text-sm font-mono font-semibold text-amber-400 mt-0.5 block">-</span>
+                <span class="text-[10px] font-mono text-zinc-500 block">Preço-alvo</span>
+                <span id="modal-target-price" class="text-sm font-mono font-semibold text-amber-400 mt-0.5 block tabular-nums">-</span>
             </div>
         </div>
 
@@ -148,12 +201,12 @@
         <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-white/[0.06]">
             <!-- Controle de Preço-Alvo no Modal -->
             <div class="flex items-center gap-2 w-full sm:w-auto">
-                <span class="text-[11px] font-mono uppercase tracking-wider text-zinc-400">Meta:</span>
+                <span class="text-xs font-mono text-zinc-400">Meta:</span>
                 <div class="relative flex-1 sm:w-36">
                     <span class="absolute inset-y-0 left-0 pl-2.5 flex items-center text-zinc-500 text-xs font-mono">
                         R$
                     </span>
-                    <input type="number" step="0.01" min="0" id="modal-input-target-price" placeholder="Definir alvo" class="w-full pl-8 pr-2.5 py-1.5 bg-zinc-900/90 border border-white/[0.08] rounded-xl text-xs font-mono text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-white/25 transition">
+                    <input type="number" step="0.01" min="0" id="modal-input-target-price" placeholder="Definir alvo" class="w-full pl-8 pr-2.5 py-1.5 bg-zinc-900/90 border border-white/[0.08] rounded-xl text-xs font-mono text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-white/25 transition tabular-nums">
                 </div>
                 <button id="modal-btn-save-target" onclick="saveTargetPriceFromModal()" class="py-1.5 px-3 bg-white hover:bg-zinc-200 text-zinc-950 text-xs font-semibold rounded-xl transition active:scale-95 flex items-center space-x-1.5 shadow-sm" title="Salvar preço-alvo">
                     <i class="fa-solid fa-check text-[10px]"></i>
@@ -239,22 +292,23 @@
             products.forEach(p => {
                 let platformBadge = '';
                 const plat = (p.platform || '').toLowerCase();
+                const baseBadgeClass = 'px-2 py-0.5 text-[10px] font-mono tracking-wide rounded-md bg-white/[0.04] text-zinc-300 border border-white/[0.08] font-medium inline-flex items-center gap-1.5';
                 if (plat === 'mercadolivre') {
-                    platformBadge = '<span class="px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider rounded-md bg-amber-400/10 text-amber-300 border border-amber-400/20 font-medium">Mercado Livre</span>';
+                    platformBadge = `<span class="${baseBadgeClass}"><span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>Mercado Livre</span>`;
                 } else if (plat === 'amazon') {
-                    platformBadge = '<span class="px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider rounded-md bg-orange-400/10 text-orange-300 border border-orange-400/20 font-medium">Amazon</span>';
+                    platformBadge = `<span class="${baseBadgeClass}"><span class="w-1.5 h-1.5 rounded-full bg-orange-400"></span>Amazon</span>`;
                 } else if (plat === 'magalu' || plat === 'magazineluiza') {
-                    platformBadge = '<span class="px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider rounded-md bg-blue-400/10 text-blue-300 border border-blue-400/20 font-medium">Magalu</span>';
+                    platformBadge = `<span class="${baseBadgeClass}"><span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>Magalu</span>`;
                 } else if (plat === 'kabum') {
-                    platformBadge = '<span class="px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider rounded-md bg-orange-500/10 text-orange-400 border border-orange-500/20 font-medium">KaBuM!</span>';
+                    platformBadge = `<span class="${baseBadgeClass}"><span class="w-1.5 h-1.5 rounded-full bg-orange-500"></span>KaBuM!</span>`;
                 } else if (plat === 'shopee') {
-                    platformBadge = '<span class="px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider rounded-md bg-red-400/10 text-red-300 border border-red-400/20 font-medium">Shopee</span>';
+                    platformBadge = `<span class="${baseBadgeClass}"><span class="w-1.5 h-1.5 rounded-full bg-red-400"></span>Shopee</span>`;
                 } else {
                     let domain = 'Loja Online';
                     try {
                         domain = new URL(p.url).hostname.replace(/^www\./, '');
                     } catch {}
-                    platformBadge = `<span class="px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider rounded-md bg-zinc-800 text-zinc-300 border border-white/[0.08] font-medium">${domain}</span>`;
+                    platformBadge = `<span class="${baseBadgeClass}"><span class="w-1.5 h-1.5 rounded-full bg-zinc-400"></span>${domain}</span>`;
                 }
 
                 const stockBadge = p.in_stock
@@ -324,29 +378,29 @@
                         </div>
                         <h3 class="text-sm font-medium text-zinc-200 line-clamp-2 group-hover:text-white transition leading-snug" title="${p.title}">${p.title}</h3>
                         
-                        <div class="pt-2 grid grid-cols-2 gap-2 border-t border-white/[0.04]">
+                        <div class="pt-3 grid grid-cols-2 gap-2 border-t border-white/[0.04] min-h-[52px] items-end">
                             <div>
-                                <span class="text-[10px] uppercase font-mono tracking-wider text-zinc-500 block mb-0.5">Último Preço</span>
+                                <span class="text-[10px] font-mono tracking-wider text-zinc-500 block mb-0.5">Último preço</span>
                                 ${priceDisplay}
                             </div>
                             <div class="text-right">
-                                <span class="text-[10px] uppercase font-mono tracking-wider text-zinc-500 block mb-0.5">Preço-Alvo</span>
+                                <span class="text-[10px] font-mono tracking-wider text-zinc-500 block mb-0.5">Preço-alvo</span>
                                 ${targetDisplay}
                             </div>
                         </div>
                     </div>
 
                     <div class="pt-4 mt-5 border-t border-white/[0.06] flex items-center justify-between gap-2">
-                        <button onclick="openHistoryModal(${p.id}, '${p.title.replace(/'/g, "\\'")}', ${targetPriceParam})" class="flex-1 py-1.5 px-3 bg-white/[0.05] hover:bg-white/[0.1] text-zinc-200 border border-white/[0.08] rounded-lg text-xs font-medium transition flex items-center justify-center space-x-1.5">
+                        <button onclick="openHistoryModal(${p.id}, '${p.title.replace(/'/g, "\\'")}', ${targetPriceParam})" class="flex-1 py-1.5 px-3 bg-white/[0.05] hover:bg-white/[0.1] text-zinc-200 border border-white/[0.08] rounded-lg text-xs font-medium transition active:scale-[0.97] flex items-center justify-center space-x-1.5">
                             <i class="fa-solid fa-chart-line text-[10px]"></i>
                             <span>Histórico</span>
                         </button>
 
-                        <a href="${p.url}" target="_blank" rel="noopener noreferrer" class="p-1.5 px-2.5 bg-white/[0.03] hover:bg-white/[0.08] text-zinc-400 hover:text-zinc-200 border border-white/[0.06] rounded-lg text-xs transition" title="Abrir anúncio original">
+                        <a href="${p.url}" target="_blank" rel="noopener noreferrer" class="p-1.5 px-2.5 bg-white/[0.03] hover:bg-white/[0.08] text-zinc-400 hover:text-zinc-200 border border-white/[0.06] rounded-lg text-xs transition active:scale-[0.97]" title="Abrir anúncio original">
                             <i class="fa-solid fa-arrow-up-right-from-square text-[11px]"></i>
                         </a>
 
-                        <button onclick="handleDeleteProduct(${p.id}, this)" class="p-1.5 px-2.5 bg-rose-500/[0.05] hover:bg-rose-500/[0.15] text-rose-400 border border-rose-500/20 rounded-lg text-xs transition active:scale-95" title="Excluir monitoramento">
+                        <button onclick="handleDeleteProduct(${p.id}, this)" class="p-1.5 px-2.5 bg-rose-500/[0.05] hover:bg-rose-500/[0.15] text-rose-400 border border-rose-500/20 rounded-lg text-xs transition active:scale-[0.97]" title="Excluir monitoramento">
                             <i class="fa-solid fa-trash text-[11px]"></i>
                         </button>
                     </div>
