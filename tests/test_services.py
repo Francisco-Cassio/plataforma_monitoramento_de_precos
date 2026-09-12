@@ -1,5 +1,5 @@
 from decimal import Decimal
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -106,20 +106,24 @@ async def test_notification_anti_spam_and_auto_rearm():
         is_triggered=False,
     )
 
-    # 1. Bateu a meta -> dispara notificação
-    count1 = await service.process_product_alerts(product, Decimal("3900.00"), [alert])
-    assert count1 == 1
-    assert alert.is_triggered is True
+    with patch("aiosmtplib.send", new_callable=AsyncMock) as mock_send:
+        # 1. Bateu a meta -> dispara notificação
+        count1 = await service.process_product_alerts(product, Decimal("3900.00"), [alert])
+        assert count1 == 1
+        assert alert.is_triggered is True
+        assert mock_send.await_count == 1
 
-    # 2. Preço continua baixo -> não dispara de novo (anti-spam)
-    count2 = await service.process_product_alerts(product, Decimal("3800.00"), [alert])
-    assert count2 == 0
-    assert alert.is_triggered is True
+        # 2. Preço continua baixo -> não dispara de novo
+        count2 = await service.process_product_alerts(product, Decimal("3800.00"), [alert])
+        assert count2 == 0
+        assert alert.is_triggered is True
+        assert mock_send.await_count == 1
 
-    # 3. Preço subiu -> rearma o alerta
-    count3 = await service.process_product_alerts(product, Decimal("4200.00"), [alert])
-    assert count3 == 0
-    assert alert.is_triggered is False
+        # 3. Preço subiu -> rearma o alerta
+        count3 = await service.process_product_alerts(product, Decimal("4200.00"), [alert])
+        assert count3 == 0
+        assert alert.is_triggered is False
+        assert mock_send.await_count == 1
 
 
 # Geração de chave determinística no Redis a partir da URL

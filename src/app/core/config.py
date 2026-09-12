@@ -23,4 +23,14 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
+    # Configurações de Notificação por E-mail (SMTP)
+    EMAILS_ENABLED: bool = True
+    SMTP_HOST: str = "mailpit"
+    SMTP_PORT: int = 1025
+    SMTP_USER: str = ""
+    SMTP_PASSWORD: str = ""
+    SMTP_TLS: bool = False
+    EMAILS_FROM_EMAIL: str = "alertas@vigia.com"
+    EMAILS_FROM_NAME: str = "Vigia Alertas"
+
 settings = Settings()
