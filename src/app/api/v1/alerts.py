@@ -55,3 +55,19 @@ async def delete_alert(
     Remove uma regra de alerta de preço.
     """
     await service.delete_alert(alert_id=alert_id, user_id=current_user.id)
+
+
+@router.delete(
+    "/product/{product_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Remover alerta de preço associado a um produto",
+)
+async def delete_alert_by_product(
+    product_id: int,
+    current_user: User = Depends(get_current_user),
+    service: AlertService = Depends(get_alert_service),
+):
+    """
+    Remove o alerta de preço configurado para o produto especificado.
+    """
+    await service.delete_alert_by_product(product_id=product_id, user_id=current_user.id)

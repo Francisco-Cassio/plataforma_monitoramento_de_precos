@@ -3,8 +3,8 @@ from fastapi import APIRouter, Depends, status
 
 from app.api.deps import get_current_user, get_product_service
 from app.models.user import User
-from app.schemas.product import ProductCreate, ProductResponse
 from app.services.product_service import ProductService
+from app.schemas.product import PriceHistoryResponse, ProductCreate, ProductResponse
 
 router = APIRouter()
 
@@ -74,3 +74,19 @@ async def delete_monitored_product(
     Remove um produto da lista de monitoramento do usuário.
     """
     await service.delete_product(product_id=product_id, user_id=current_user.id)
+
+
+@router.get(
+    "/{product_id}/history",
+    response_model=List[PriceHistoryResponse],
+    summary="Obter histórico de preços de um produto",
+)
+async def get_product_history(
+    product_id: int,
+    current_user: User = Depends(get_current_user),
+    service: ProductService = Depends(get_product_service),
+):
+    """
+    Retorna o histórico cronológico de preços para exibição em gráficos.
+    """
+    return await service.get_product_history(product_id=product_id, user_id=current_user.id)

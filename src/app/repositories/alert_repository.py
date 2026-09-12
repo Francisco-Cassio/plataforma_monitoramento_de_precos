@@ -24,6 +24,14 @@ class AlertRepository:
         result = await self.session.execute(query)
         return list(result.scalars().all())
 
+    async def get_by_product_and_user(self, product_id: int, user_id: int) -> Optional[PriceAlert]:
+        query = select(PriceAlert).where(
+            PriceAlert.product_id == product_id,
+            PriceAlert.user_id == user_id
+        )
+        result = await self.session.execute(query)
+        return result.scalar_one_or_none()
+
     async def create(self, alert: PriceAlert) -> PriceAlert:
         self.session.add(alert)
         await self.session.commit()

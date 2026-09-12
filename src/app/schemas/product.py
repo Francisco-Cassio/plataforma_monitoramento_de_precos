@@ -33,3 +33,12 @@ class ProductResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     model_config = ConfigDict(from_attributes=True)
+
+
+class PriceHistoryResponse(BaseModel):
+    id: int
+    product_id: int
+    price: Decimal
+    in_stock: bool
+    captured_at: datetime
+    model_config = ConfigDict(from_attributes=True)

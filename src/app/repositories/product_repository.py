@@ -3,6 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.product import MonitoredProduct
+from app.models.price_history import PriceHistory
 
 
 class ProductRepository:
@@ -49,5 +50,15 @@ class ProductRepository:
 
     async def list_all(self) -> List[MonitoredProduct]:
         query = select(MonitoredProduct)
+        result = await self.session.execute(query)
+        return list(result.scalars().all())
+
+    async def get_price_history(self, product_id: int, limit: int = 100) -> List[PriceHistory]:
+        query = (
+            select(PriceHistory)
+            .where(PriceHistory.product_id == product_id)
+            .order_by(PriceHistory.captured_at.asc())
+            .limit(limit)
+        )
         result = await self.session.execute(query)
         return list(result.scalars().all())

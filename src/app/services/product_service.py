@@ -5,7 +5,8 @@ from app.models.alert import PriceAlert
 from app.models.product import MonitoredProduct
 from app.repositories.alert_repository import AlertRepository
 from app.repositories.product_repository import ProductRepository
-from app.schemas.product import ProductCreate, ProductUpdate
+from app.schemas.product import ProductCreate
+from app.models.price_history import PriceHistory
 
 
 class ProductService:
@@ -25,6 +26,10 @@ class ProductService:
             return "mercadolivre"
         elif "magazineluiza" in url_lower or "magalu" in url_lower:
             return "magalu"
+        elif "kabum" in url_lower:
+            return "kabum"
+        elif "shopee" in url_lower:
+            return "shopee"
         return "custom"
 
     async def create_product(self, product_in: ProductCreate, user_id: int) -> MonitoredProduct:
@@ -77,3 +82,7 @@ class ProductService:
     async def delete_product(self, product_id: int, user_id: int) -> None:
         product = await self.get_product(product_id, user_id)
         await self.product_repo.delete(product)
+
+    async def get_product_history(self, product_id: int, user_id: int) -> List[PriceHistory]:
+        await self.get_product(product_id, user_id)
+        return await self.product_repo.get_price_history(product_id)

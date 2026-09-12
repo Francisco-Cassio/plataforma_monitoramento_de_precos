@@ -26,6 +26,15 @@ class AlertService:
                 detail='Você não tem permissão para criar alerta para este produto.',
             )
 
+        existing_alert = await self.alert_repo.get_by_product_and_user(
+            product_id=alert_in.product_id, user_id=user_id
+        )
+        if existing_alert:
+            existing_alert.target_price = alert_in.target_price
+            existing_alert.condition = alert_in.condition
+            existing_alert.is_triggered = False
+            return await self.alert_repo.update(existing_alert)
+
         new_alert = PriceAlert(
             product_id=alert_in.product_id,
             user_id=user_id,
@@ -51,3 +60,10 @@ class AlertService:
                 detail='Este alerta não pertence ao usuário.',
             )
         await self.alert_repo.delete(alert)
+
+    async def delete_alert_by_product(self, product_id: int, user_id: int) -> None:
+        alert = await self.alert_repo.get_by_product_and_user(
+            product_id=product_id, user_id=user_id
+        )
+        if alert:
+            await self.alert_repo.delete(alert)
