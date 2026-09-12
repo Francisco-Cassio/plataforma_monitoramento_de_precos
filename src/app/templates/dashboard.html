@@ -1,0 +1,713 @@
+{% extends "base.html" %}
+
+{% block title %}Painel de Controle &bull; Vigia{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    
+    <!-- Barra de Métricas Integrada (Stat Strip) -->
+    <div class="bg-[#121215] border border-white/[0.08] rounded-2xl p-5 grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-0 sm:divide-x sm:divide-white/[0.06]">
+        <div class="sm:px-5 first:pl-0 flex flex-col justify-center">
+            <span class="text-[11px] font-medium uppercase tracking-wider text-zinc-400">Total Monitorado</span>
+            <div class="flex items-baseline space-x-2 mt-1">
+                <span id="metric-total" class="text-3xl font-mono font-semibold tracking-tight text-white">0</span>
+                <span class="text-xs text-zinc-500">produtos ativos</span>
+            </div>
+        </div>
+
+        <div class="sm:px-5 flex flex-col justify-center">
+            <span class="text-[11px] font-medium uppercase tracking-wider text-zinc-400">Em Estoque</span>
+            <div class="flex items-baseline space-x-2 mt-1">
+                <span id="metric-in-stock" class="text-3xl font-mono font-semibold tracking-tight text-emerald-400">0</span>
+                <span class="text-xs text-zinc-500">disponíveis</span>
+            </div>
+        </div>
+
+        <div class="sm:px-5 last:pr-0 flex flex-col justify-center">
+            <span class="text-[11px] font-medium uppercase tracking-wider text-zinc-400">Alertas de Preço</span>
+            <div class="flex items-baseline space-x-2 mt-1">
+                <span id="metric-alerts" class="text-3xl font-mono font-semibold tracking-tight text-white">0</span>
+                <span class="text-xs text-zinc-500">armados</span>
+            </div>
+            <div class="flex items-center space-x-1.5 mt-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.5)]"></span>
+                <span class="text-[11px] font-mono text-zinc-400">vigilância ativa 24h</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Command Bar: Monitorar Novo Produto -->
+    <div class="bg-[#121215] border border-white/[0.08] rounded-2xl p-6 shadow-sm">
+        <div class="mb-4">
+            <h2 class="text-sm font-semibold tracking-tight text-white flex items-center gap-2">
+                <span>Rastrear Novo Produto</span>
+            </h2>
+            <p class="text-xs text-zinc-400 mt-0.5">Cole a URL de um produto em lojas e e-commerces compatíveis</p>
+        </div>
+
+        <form id="add-product-form" onsubmit="handleAddProduct(event)" class="grid grid-cols-1 lg:grid-cols-12 gap-3">
+            <div class="lg:col-span-8">
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-zinc-500 text-xs">
+                        <i class="fa-solid fa-link"></i>
+                    </span>
+                    <input type="url" id="product-url" required placeholder="https://... (Mercado Livre, Amazon, Magalu, Kabum ou outros)" class="w-full pl-9 pr-4 py-2.5 bg-zinc-900/70 border border-white/[0.08] rounded-xl text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20 text-xs transition font-mono">
+                </div>
+            </div>
+
+            <div class="lg:col-span-2">
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-zinc-500 text-xs font-mono">
+                        R$
+                    </span>
+                    <input type="number" step="0.01" min="0" id="product-target-price" placeholder="Alvo (opcional)" class="w-full pl-9 pr-3 py-2.5 bg-zinc-900/70 border border-white/[0.08] rounded-xl text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-white/20 focus:ring-1 focus:ring-white/20 text-xs transition font-mono">
+                </div>
+            </div>
+
+            <div class="lg:col-span-2">
+                <button type="submit" id="add-product-btn" class="w-full h-full py-2.5 px-4 bg-white hover:bg-zinc-200 text-zinc-950 font-semibold rounded-xl text-xs uppercase tracking-wider transition active:scale-[0.98] shadow-sm flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-plus text-[10px]"></i>
+                    <span>Rastrear</span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Lista de Produtos Monitorados -->
+    <div>
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center space-x-2">
+                <h2 class="text-sm font-semibold tracking-tight text-white">Produtos Sob Vigia</h2>
+                <span id="product-count-badge" class="text-[11px] font-mono px-2 py-0.5 rounded-full bg-white/[0.06] border border-white/[0.08] text-zinc-400 font-medium">0</span>
+            </div>
+            <button id="btn-sync" onclick="loadProducts()" class="text-xs text-zinc-400 hover:text-zinc-200 flex items-center space-x-1.5 transition font-mono active:scale-95 disabled:opacity-50 group" title="Atualizar dados">
+                <i id="sync-icon" class="fa-solid fa-arrows-rotate text-[11px] group-hover:text-white transition"></i>
+                <span>Sincronizar</span>
+            </button>
+        </div>
+
+        <!-- Grade de Produtos -->
+        <div id="products-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <!-- Os cards são gerados dinamicamente via JavaScript -->
+        </div>
+
+        <!-- Estado Vazio (Zero produtos) -->
+        <div id="empty-state" class="hidden text-center py-20 bg-[#121215]/50 border border-dashed border-white/[0.08] rounded-2xl">
+            <div class="w-12 h-12 mx-auto rounded-xl bg-zinc-900 border border-white/[0.08] text-zinc-500 flex items-center justify-center text-lg mb-3">
+                <i class="fa-solid fa-layer-group"></i>
+            </div>
+            <h3 class="text-sm font-semibold text-zinc-300">Nenhum produto sob vigia</h3>
+            <p class="text-xs text-zinc-500 max-w-xs mx-auto mt-1">Cole a URL de um produto no campo acima para que o Vigia inicie o monitoramento em segundo plano.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Gráfico de Histórico de Preços -->
+<div id="history-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md hidden opacity-0 transition-opacity duration-200">
+    <div class="bg-[#121215] border border-white/[0.12] rounded-2xl shadow-2xl max-w-3xl w-full p-6 space-y-6 transform transition-all scale-95 duration-200" id="modal-container">
+        
+        <div class="flex items-start justify-between border-b border-white/[0.06] pb-4">
+            <div class="space-y-1">
+                <span class="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-white/[0.05] border border-white/[0.08] text-zinc-400 font-medium">Histórico Cronológico</span>
+                <h3 id="modal-product-title" class="text-sm font-semibold text-white line-clamp-1">Produto</h3>
+            </div>
+            <button onclick="closeModal()" class="w-7 h-7 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-zinc-400 hover:text-white flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark text-xs"></i>
+            </button>
+        </div>
+
+        <!-- Resumo Rápido no Modal: 4 Colunas -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-zinc-900/60 border border-white/[0.06] rounded-xl p-3 text-center">
+            <div>
+                <span class="text-[10px] uppercase font-mono tracking-wider text-zinc-500 block">Menor Preço</span>
+                <span id="modal-min-price" class="text-sm font-mono font-semibold text-emerald-400 mt-0.5 block">-</span>
+            </div>
+            <div>
+                <span class="text-[10px] uppercase font-mono tracking-wider text-zinc-500 block">Maior Preço</span>
+                <span id="modal-max-price" class="text-sm font-mono font-semibold text-rose-400 mt-0.5 block">-</span>
+            </div>
+            <div>
+                <span class="text-[10px] uppercase font-mono tracking-wider text-zinc-500 block">Preço Atual</span>
+                <span id="modal-curr-price" class="text-sm font-mono font-semibold text-white mt-0.5 block">-</span>
+            </div>
+            <div>
+                <span class="text-[10px] uppercase font-mono tracking-wider text-zinc-500 block">Preço-Alvo</span>
+                <span id="modal-target-price" class="text-sm font-mono font-semibold text-amber-400 mt-0.5 block">-</span>
+            </div>
+        </div>
+
+        <!-- Canvas do Gráfico -->
+        <div class="relative h-64 w-full">
+            <canvas id="priceHistoryChart"></canvas>
+            <div id="chart-loading" class="absolute inset-0 bg-[#121215]/90 flex flex-col items-center justify-center space-y-2">
+                <i class="fa-solid fa-spinner fa-spin text-lg text-zinc-400"></i>
+                <span class="text-xs font-mono text-zinc-500">Buscando histórico...</span>
+            </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-white/[0.06]">
+            <!-- Controle de Preço-Alvo no Modal -->
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+                <span class="text-[11px] font-mono uppercase tracking-wider text-zinc-400">Meta:</span>
+                <div class="relative flex-1 sm:w-36">
+                    <span class="absolute inset-y-0 left-0 pl-2.5 flex items-center text-zinc-500 text-xs font-mono">
+                        R$
+                    </span>
+                    <input type="number" step="0.01" min="0" id="modal-input-target-price" placeholder="Definir alvo" class="w-full pl-8 pr-2.5 py-1.5 bg-zinc-900/90 border border-white/[0.08] rounded-xl text-xs font-mono text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-white/25 transition">
+                </div>
+                <button id="modal-btn-save-target" onclick="saveTargetPriceFromModal()" class="py-1.5 px-3 bg-white hover:bg-zinc-200 text-zinc-950 text-xs font-semibold rounded-xl transition active:scale-95 flex items-center space-x-1.5 shadow-sm" title="Salvar preço-alvo">
+                    <i class="fa-solid fa-check text-[10px]"></i>
+                    <span>Salvar</span>
+                </button>
+                <button id="modal-btn-remove-target" onclick="removeTargetPriceFromModal()" class="py-1.5 px-2.5 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 rounded-xl text-xs transition active:scale-95 hidden" title="Remover meta deste produto">
+                    <i class="fa-solid fa-trash text-[10px]"></i>
+                </button>
+            </div>
+
+            <div class="w-full sm:w-auto flex justify-end">
+                <button onclick="closeModal()" class="px-4 py-1.5 bg-white/[0.05] hover:bg-white/[0.1] text-zinc-300 text-xs font-medium rounded-xl border border-white/[0.08] transition">
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    let priceChart = null;
+    let currentModalProductId = null;
+    let currentModalTitle = '';
+    let currentModalHistory = [];
+    let currentModalTargetPrice = null;
+
+    // Formatação monetária precisa
+    function formatMoney(value) {
+        if (value === null || value === undefined) return 'Não coletado';
+        return Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    // Carrega produtos do usuário
+    async function loadProducts() {
+        const grid = document.getElementById('products-grid');
+        const emptyState = document.getElementById('empty-state');
+        const countBadge = document.getElementById('product-count-badge');
+        const metricTotal = document.getElementById('metric-total');
+        const metricInStock = document.getElementById('metric-in-stock');
+        const metricAlerts = document.getElementById('metric-alerts');
+        const syncIcon = document.getElementById('sync-icon');
+        const btnSync = document.getElementById('btn-sync');
+
+        if (syncIcon) syncIcon.classList.add('fa-spin');
+        if (btnSync) btnSync.disabled = true;
+
+        try {
+            const [prodRes, alertRes] = await Promise.all([
+                fetch('/api/v1/products/', { headers: getAuthHeaders() }),
+                fetch('/api/v1/alerts/', { headers: getAuthHeaders() }),
+                new Promise(resolve => setTimeout(resolve, 450))
+            ]);
+
+            if (prodRes.status === 401 || alertRes.status === 401) {
+                logout();
+                return;
+            }
+
+            const products = await prodRes.json();
+            const alerts = alertRes.ok ? await alertRes.json() : [];
+
+            metricTotal.textContent = products.length;
+            countBadge.textContent = products.length;
+
+            const inStockCount = products.filter(p => p.in_stock).length;
+            metricInStock.textContent = inStockCount;
+
+            if (metricAlerts) {
+                metricAlerts.textContent = alerts.length;
+            }
+
+            grid.innerHTML = '';
+
+            if (products.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+
+            products.forEach(p => {
+                let platformBadge = '';
+                const plat = (p.platform || '').toLowerCase();
+                if (plat === 'mercadolivre') {
+                    platformBadge = '<span class="px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider rounded-md bg-amber-400/10 text-amber-300 border border-amber-400/20 font-medium">Mercado Livre</span>';
+                } else if (plat === 'amazon') {
+                    platformBadge = '<span class="px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider rounded-md bg-orange-400/10 text-orange-300 border border-orange-400/20 font-medium">Amazon</span>';
+                } else if (plat === 'magalu' || plat === 'magazineluiza') {
+                    platformBadge = '<span class="px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider rounded-md bg-blue-400/10 text-blue-300 border border-blue-400/20 font-medium">Magalu</span>';
+                } else if (plat === 'kabum') {
+                    platformBadge = '<span class="px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider rounded-md bg-orange-500/10 text-orange-400 border border-orange-500/20 font-medium">KaBuM!</span>';
+                } else if (plat === 'shopee') {
+                    platformBadge = '<span class="px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider rounded-md bg-red-400/10 text-red-300 border border-red-400/20 font-medium">Shopee</span>';
+                } else {
+                    let domain = 'Loja Online';
+                    try {
+                        domain = new URL(p.url).hostname.replace(/^www\./, '');
+                    } catch {}
+                    platformBadge = `<span class="px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider rounded-md bg-zinc-800 text-zinc-300 border border-white/[0.08] font-medium">${domain}</span>`;
+                }
+
+                const stockBadge = p.in_stock
+                    ? '<span class="text-[11px] font-mono text-emerald-400 font-medium flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.5)]"></span>Estoque</span>'
+                    : '<span class="text-[11px] font-mono text-rose-400 font-medium flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>Esgotado</span>';
+
+                const priceDisplay = p.last_price 
+                    ? `<span class="text-xl font-mono font-bold tracking-tight text-white tabular-nums">${formatMoney(p.last_price)}</span>`
+                    : '<span class="text-xs font-mono text-zinc-400 bg-white/[0.04] border border-white/[0.06] px-2 py-0.5 rounded-lg">Aguardando coleta...</span>';
+
+                // Cálculo e formatação do Preço-Alvo (Estética de Alta Precisão / Sem clichês de IA)
+                const alert = alerts.find(a => a.product_id === p.id);
+                let targetPriceParam = 'null';
+                let targetDisplay = `
+                    <button onclick="openHistoryModal(${p.id}, '${p.title.replace(/'/g, "\\'")}', null)" class="text-[11px] font-mono text-zinc-400 hover:text-white underline underline-offset-4 decoration-zinc-700 hover:decoration-white transition cursor-pointer mt-1 block" title="Clique para definir uma meta de preço">
+                        + Definir meta
+                    </button>
+                `;
+                const isReached = Boolean(alert && alert.target_price && p.last_price && Number(p.last_price) <= Number(alert.target_price));
+
+                if (alert && alert.target_price) {
+                    targetPriceParam = Number(alert.target_price);
+                    const targetVal = Number(alert.target_price);
+
+                    if (isReached) {
+                        targetDisplay = `
+                            <div class="flex flex-col items-end">
+                                <span class="text-sm font-mono font-medium text-zinc-100 tabular-nums">${formatMoney(targetVal)}</span>
+                                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 mt-1 rounded-md text-[10px] font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.5)]"></span>
+                                    Meta atingida
+                                </span>
+                            </div>
+                        `;
+                    } else if (p.last_price) {
+                        const diff = Number(p.last_price) - targetVal;
+                        targetDisplay = `
+                            <div class="flex flex-col items-end">
+                                <span class="text-sm font-mono font-medium text-zinc-300 tabular-nums">${formatMoney(targetVal)}</span>
+                                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 mt-1 rounded-md text-[10px] font-mono font-medium bg-zinc-800/80 text-zinc-400 border border-white/[0.06]">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-400/80"></span>
+                                    +${formatMoney(diff)}
+                                </span>
+                            </div>
+                        `;
+                    } else {
+                        targetDisplay = `
+                            <div class="flex flex-col items-end">
+                                <span class="text-sm font-mono font-medium text-zinc-400 tabular-nums">${formatMoney(targetVal)}</span>
+                                <span class="text-[10px] font-mono text-zinc-500 mt-1">Aguardando</span>
+                            </div>
+                        `;
+                    }
+                }
+
+                const cardBorder = isReached
+                    ? 'border-emerald-500/20 hover:border-emerald-500/40 bg-[#121215]'
+                    : 'border-white/[0.08] hover:border-white/[0.18] bg-[#121215]';
+
+                const card = document.createElement('div');
+                card.className = `${cardBorder} border rounded-2xl p-5 shadow-sm flex flex-col justify-between transition duration-200 group`;
+                card.innerHTML = `
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            ${platformBadge}
+                            ${stockBadge}
+                        </div>
+                        <h3 class="text-sm font-medium text-zinc-200 line-clamp-2 group-hover:text-white transition leading-snug" title="${p.title}">${p.title}</h3>
+                        
+                        <div class="pt-2 grid grid-cols-2 gap-2 border-t border-white/[0.04]">
+                            <div>
+                                <span class="text-[10px] uppercase font-mono tracking-wider text-zinc-500 block mb-0.5">Último Preço</span>
+                                ${priceDisplay}
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[10px] uppercase font-mono tracking-wider text-zinc-500 block mb-0.5">Preço-Alvo</span>
+                                ${targetDisplay}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 mt-5 border-t border-white/[0.06] flex items-center justify-between gap-2">
+                        <button onclick="openHistoryModal(${p.id}, '${p.title.replace(/'/g, "\\'")}', ${targetPriceParam})" class="flex-1 py-1.5 px-3 bg-white/[0.05] hover:bg-white/[0.1] text-zinc-200 border border-white/[0.08] rounded-lg text-xs font-medium transition flex items-center justify-center space-x-1.5">
+                            <i class="fa-solid fa-chart-line text-[10px]"></i>
+                            <span>Histórico</span>
+                        </button>
+
+                        <a href="${p.url}" target="_blank" rel="noopener noreferrer" class="p-1.5 px-2.5 bg-white/[0.03] hover:bg-white/[0.08] text-zinc-400 hover:text-zinc-200 border border-white/[0.06] rounded-lg text-xs transition" title="Abrir anúncio original">
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[11px]"></i>
+                        </a>
+
+                        <button onclick="handleDeleteProduct(${p.id})" class="p-1.5 px-2.5 bg-rose-500/[0.05] hover:bg-rose-500/[0.15] text-rose-400 border border-rose-500/20 rounded-lg text-xs transition" title="Excluir monitoramento">
+                            <i class="fa-solid fa-trash text-[11px]"></i>
+                        </button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        } catch (err) {
+            showToast('Erro ao listar produtos.', 'error');
+        } finally {
+            if (syncIcon) syncIcon.classList.remove('fa-spin');
+            if (btnSync) btnSync.disabled = false;
+        }
+    }
+
+    // Adiciona produto
+    async function handleAddProduct(event) {
+        event.preventDefault();
+        const btn = document.getElementById('add-product-btn');
+        const urlInput = document.getElementById('product-url');
+        const targetPriceInput = document.getElementById('product-target-price');
+
+        const url = urlInput.value.trim();
+        const targetPrice = targetPriceInput.value ? parseFloat(targetPriceInput.value) : null;
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xs"></i>';
+
+        try {
+            const payload = { url };
+            if (targetPrice) payload.target_price = targetPrice;
+
+            const response = await fetch('/api/v1/products/', {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.detail || 'Falha ao cadastrar produto.');
+            }
+
+            showToast('Produto cadastrado para monitoramento.', 'success');
+            urlInput.value = '';
+            targetPriceInput.value = '';
+            loadProducts();
+        } catch (err) {
+            showToast(err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-plus text-[10px]"></i><span>Rastrear</span>';
+        }
+    }
+
+    // Exclui produto
+    async function handleDeleteProduct(productId) {
+        if (!confirm('Deseja realmente interromper o monitoramento deste produto?')) return;
+
+        try {
+            const response = await fetch(`/api/v1/products/${productId}`, {
+                method: 'DELETE',
+                headers: getAuthHeaders()
+            });
+
+            if (!response.ok) {
+                throw new Error('Falha ao remover produto.');
+            }
+
+            showToast('Produto removido.', 'info');
+            loadProducts();
+        } catch (err) {
+            showToast(err.message, 'error');
+        }
+    }
+
+    // Abre o modal do histórico e desenha o gráfico
+    async function openHistoryModal(productId, title, targetPrice = null) {
+        currentModalProductId = productId;
+        currentModalTitle = title;
+        currentModalTargetPrice = targetPrice ? Number(targetPrice) : null;
+        currentModalHistory = [];
+
+        const modal = document.getElementById('history-modal');
+        const modalContainer = document.getElementById('modal-container');
+        const titleEl = document.getElementById('modal-product-title');
+        const loadingEl = document.getElementById('chart-loading');
+        const targetEl = document.getElementById('modal-target-price');
+        const inputTarget = document.getElementById('modal-input-target-price');
+        const btnRemoveTarget = document.getElementById('modal-btn-remove-target');
+
+        titleEl.textContent = title;
+        if (targetEl) {
+            targetEl.textContent = targetPrice ? formatMoney(targetPrice) : '-';
+        }
+        if (inputTarget) {
+            inputTarget.value = targetPrice ? Number(targetPrice) : '';
+        }
+        if (btnRemoveTarget) {
+            if (targetPrice) {
+                btnRemoveTarget.classList.remove('hidden');
+            } else {
+                btnRemoveTarget.classList.add('hidden');
+            }
+        }
+
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            modalContainer.classList.remove('scale-95');
+        }, 10);
+
+        loadingEl.classList.remove('hidden');
+
+        try {
+            const response = await fetch(`/api/v1/products/${productId}/history`, { headers: getAuthHeaders() });
+            const history = await response.json();
+            currentModalHistory = history;
+
+            loadingEl.classList.add('hidden');
+            renderChart(history, currentModalTargetPrice);
+        } catch (err) {
+            loadingEl.classList.add('hidden');
+            showToast('Erro ao carregar histórico.', 'error');
+        }
+    }
+
+    // Salva ou atualiza a meta de preço diretamente pelo modal
+    async function saveTargetPriceFromModal() {
+        if (!currentModalProductId) return;
+
+        const input = document.getElementById('modal-input-target-price');
+        const saveBtn = document.getElementById('modal-btn-save-target');
+        const btnRemoveTarget = document.getElementById('modal-btn-remove-target');
+        const val = parseFloat(input.value);
+
+        if (isNaN(val) || val <= 0) {
+            showToast('Informe um valor de preço-alvo válido.', 'error');
+            input.focus();
+            return;
+        }
+
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-[10px]"></i>';
+
+        try {
+            const response = await fetch('/api/v1/alerts/', {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({
+                    product_id: currentModalProductId,
+                    target_price: val,
+                    condition: '<='
+                })
+            });
+
+            if (!response.ok) {
+                const data = await response.json();
+                throw new Error(data.detail || 'Falha ao salvar meta de preço.');
+            }
+
+            currentModalTargetPrice = val;
+
+            const targetEl = document.getElementById('modal-target-price');
+            if (targetEl) targetEl.textContent = formatMoney(val);
+
+            if (btnRemoveTarget) btnRemoveTarget.classList.remove('hidden');
+
+            renderChart(currentModalHistory, val);
+            showToast('Preço-alvo atualizado com sucesso.', 'success');
+            loadProducts();
+        } catch (err) {
+            showToast(err.message, 'error');
+        } finally {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="fa-solid fa-check text-[10px]"></i><span>Salvar</span>';
+        }
+    }
+
+    // Remove a meta de preço do produto pelo modal
+    async function removeTargetPriceFromModal() {
+        if (!currentModalProductId) return;
+        if (!confirm('Deseja realmente desativar o preço-alvo deste produto?')) return;
+
+        const btnRemove = document.getElementById('modal-btn-remove-target');
+        const inputTarget = document.getElementById('modal-input-target-price');
+
+        btnRemove.disabled = true;
+
+        try {
+            const response = await fetch(`/api/v1/alerts/product/${currentModalProductId}`, {
+                method: 'DELETE',
+                headers: getAuthHeaders()
+            });
+
+            if (!response.ok && response.status !== 204) {
+                throw new Error('Falha ao remover meta.');
+            }
+
+            currentModalTargetPrice = null;
+            if (inputTarget) inputTarget.value = '';
+            btnRemove.classList.add('hidden');
+
+            const targetEl = document.getElementById('modal-target-price');
+            if (targetEl) targetEl.textContent = '-';
+
+            renderChart(currentModalHistory, null);
+            showToast('Preço-alvo removido.', 'info');
+            loadProducts();
+        } catch (err) {
+            showToast(err.message, 'error');
+        } finally {
+            btnRemove.disabled = false;
+        }
+    }
+
+    // Fecha o modal
+    function closeModal() {
+        const modal = document.getElementById('history-modal');
+        const modalContainer = document.getElementById('modal-container');
+        modal.classList.add('opacity-0');
+        modalContainer.classList.add('scale-95');
+        setTimeout(() => modal.classList.add('hidden'), 200);
+    }
+
+    // Renderiza o gráfico do Chart.js com acabamento Dark Precision
+    function renderChart(history, targetPrice = null) {
+        const canvas = document.getElementById('priceHistoryChart');
+        const ctx = canvas.getContext('2d');
+        const minEl = document.getElementById('modal-min-price');
+        const maxEl = document.getElementById('modal-max-price');
+        const currEl = document.getElementById('modal-curr-price');
+        const targetEl = document.getElementById('modal-target-price');
+
+        if (priceChart) {
+            priceChart.destroy();
+        }
+
+        if (targetEl) {
+            targetEl.textContent = targetPrice ? formatMoney(targetPrice) : '-';
+        }
+
+        if (!history || history.length === 0) {
+            minEl.textContent = '-';
+            maxEl.textContent = '-';
+            currEl.textContent = '-';
+            return;
+        }
+
+        const labels = history.map(item => {
+            const date = new Date(item.captured_at);
+            return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+        });
+
+        const dataPoints = history.map(item => Number(item.price));
+        const minPrice = Math.min(...dataPoints);
+        const maxPrice = Math.max(...dataPoints);
+        const currPrice = dataPoints[dataPoints.length - 1];
+
+        minEl.textContent = formatMoney(minPrice);
+        maxEl.textContent = formatMoney(maxPrice);
+        currEl.textContent = formatMoney(currPrice);
+
+        // Gradiente vertical refinado
+        const gradient = ctx.createLinearGradient(0, 0, 0, 240);
+        gradient.addColorStop(0, 'rgba(255, 255, 255, 0.12)');
+        gradient.addColorStop(1, 'rgba(255, 255, 255, 0.00)');
+
+        const datasets = [{
+            label: 'Preço Coletado',
+            data: dataPoints,
+            borderColor: '#FFFFFF',
+            borderWidth: 2,
+            backgroundColor: gradient,
+            fill: true,
+            tension: 0.25,
+            pointBackgroundColor: '#FFFFFF',
+            pointBorderColor: '#121215',
+            pointBorderWidth: 2,
+            pointRadius: 4,
+            pointHoverRadius: 6
+        }];
+
+        if (targetPrice) {
+            datasets.push({
+                label: 'Preço-Alvo',
+                data: Array(labels.length).fill(Number(targetPrice)),
+                borderColor: '#F59E0B',
+                borderWidth: 1.5,
+                borderDash: [6, 4],
+                pointRadius: 0,
+                pointHoverRadius: 0,
+                fill: false,
+                tension: 0
+            });
+        }
+
+        priceChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: Boolean(targetPrice),
+                        position: 'top',
+                        align: 'end',
+                        labels: {
+                            boxWidth: 12,
+                            boxHeight: 2,
+                            color: '#A1A1AA',
+                            font: { family: '"Geist Mono", monospace', size: 10 }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: '#18181b',
+                        borderColor: 'rgba(255, 255, 255, 0.15)',
+                        borderWidth: 1,
+                        titleColor: '#A1A1AA',
+                        bodyColor: '#FFFFFF',
+                        titleFont: { family: '"Geist Mono", monospace', size: 10 },
+                        bodyFont: { family: '"Geist Mono", monospace', size: 12, weight: '600' },
+                        padding: 10,
+                        displayColors: Boolean(targetPrice),
+                        callbacks: {
+                            label: (ctx) => `${ctx.dataset.label || 'Preço'}: R$ ${Number(ctx.raw).toFixed(2).replace('.', ',')}`
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(255, 255, 255, 0.04)' },
+                        ticks: {
+                            color: '#71717A',
+                            font: { family: '"Geist Mono", monospace', size: 10 }
+                        }
+                    },
+                    y: {
+                        grid: { color: 'rgba(255, 255, 255, 0.04)' },
+                        ticks: {
+                            color: '#71717A',
+                            font: { family: '"Geist Mono", monospace', size: 10 },
+                            callback: (value) => 'R$ ' + value
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Inicialização da página
+    document.addEventListener('DOMContentLoaded', () => {
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            window.location.href = '/login';
+            return;
+        }
+        loadProducts();
+    });
+</script>
+{% endblock %}

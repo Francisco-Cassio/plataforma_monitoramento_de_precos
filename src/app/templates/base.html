@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Vigia &bull; Monitor de Preços{% endblock %}</title>
+    
+    <!-- Tipografia de Alta Performance: Geist Sans & Geist Mono -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-sans/style.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-mono/style.min.css">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Geist Sans"', 'system-ui', '-apple-system', 'sans-serif'],
+                        mono: ['"Geist Mono"', 'ui-monospace', 'monospace'],
+                    },
+                    colors: {
+                        canvas: '#09090b',
+                        surface: {
+                            DEFAULT: '#121215',
+                            raised: '#18181b',
+                            border: 'rgba(255, 255, 255, 0.08)',
+                            hover: 'rgba(255, 255, 255, 0.14)',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Suavização de renderização de fontes e rolagem */
+        html {
+            font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            scroll-behavior: smooth;
+        }
+        /* Efeito sutil de ruído/textura no fundo para evitar o aspecto de vetor plano */
+        body {
+            background-color: #09090b;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 0);
+            background-size: 24px 24px;
+        }
+        /* Scrollbars minimalistas */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.24);
+        }
+    </style>
+</head>
+<body class="text-zinc-100 min-h-screen flex flex-col font-sans selection:bg-zinc-800 selection:text-white">
+
+    <!-- Barra de Navegação Superior (Estilo Linear / Precision Header) -->
+    <header class="border-b border-white/[0.06] bg-[#09090b]/80 backdrop-blur-md sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <a href="/" class="flex items-center space-x-2.5 group">
+                    <div class="w-7 h-7 rounded-lg bg-zinc-900 border border-white/[0.12] flex items-center justify-center group-hover:border-white/[0.24] transition">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]"></span>
+                    </div>
+                    <span class="text-sm font-semibold tracking-tight text-white flex items-center gap-1.5">
+                        Vigia
+                        <span class="text-[10px] uppercase font-mono tracking-wider px-1.5 py-0.5 rounded bg-white/[0.05] border border-white/[0.08] text-zinc-400 font-medium">v1.0</span>
+                    </span>
+                </a>
+            </div>
+
+            <!-- Área do Usuário / Botão Sair -->
+            <div id="nav-user-area" class="flex items-center space-x-3">
+                <span id="nav-user-email" class="text-xs font-mono text-zinc-400 hidden sm:inline-block"></span>
+                <button id="nav-logout-btn" onclick="logout()" class="hidden px-2.5 py-1 rounded-lg text-xs font-medium text-zinc-400 hover:text-zinc-200 bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.08] transition">
+                    <i class="fa-solid fa-arrow-right-from-bracket mr-1"></i> Sair
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Notificações Flutuantes (Toasts Monocromáticos de Precisão) -->
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Conteúdo Principal -->
+    <main class="flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Rodapé Minimalista -->
+    <footer class="border-t border-white/[0.06] py-6 text-center text-[11px] font-mono text-zinc-500">
+        <p class="tracking-tight">Vigia &bull; Monitoramento Contínuo</p>
+    </footer>
+
+    <!-- Utilitários JavaScript Compartilhados -->
+    <script>
+        // Sistema de Toasts moderno e limpo
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const dotColors = {
+                success: 'bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.5)]',
+                error: 'bg-rose-400 shadow-[0_0_6px_rgba(251,113,133,0.5)]',
+                warning: 'bg-amber-400 shadow-[0_0_6px_rgba(251,191,36,0.5)]',
+                info: 'bg-zinc-400'
+            };
+
+            toast.className = 'bg-[#18181b]/95 border border-white/[0.12] text-zinc-200 px-4 py-2.5 rounded-xl shadow-2xl flex items-center space-x-2.5 pointer-events-auto backdrop-blur-md transform transition-all duration-200 translate-y-2 opacity-0 text-xs font-medium';
+            toast.innerHTML = `
+                <span class="w-1.5 h-1.5 rounded-full ${dotColors[type] || dotColors.info} flex-shrink-0"></span>
+                <span class="tracking-tight">${message}</span>
+            `;
+
+            container.appendChild(toast);
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            });
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'scale-95');
+                setTimeout(() => toast.remove(), 200);
+            }, 3200);
+        }
+
+        // Headers com token JWT
+        function getAuthHeaders() {
+            const token = localStorage.getItem('access_token');
+            return {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            };
+        }
+
+        // Logout
+        function logout() {
+            localStorage.removeItem('access_token');
+            window.location.href = '/login';
+        }
+
+        // Autenticação na barra superior
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('access_token');
+            const logoutBtn = document.getElementById('nav-logout-btn');
+            const emailSpan = document.getElementById('nav-user-email');
+
+            if (token && window.location.pathname !== '/login') {
+                logoutBtn.classList.remove('hidden');
+                fetch('/api/v1/auth/me', { headers: getAuthHeaders() })
+                    .then(res => res.ok ? res.json() : null)
+                    .then(user => {
+                        if (user && emailSpan) {
+                            emailSpan.textContent = user.email;
+                        }
+                    })
+                    .catch(() => {});
+            }
+        });
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>
