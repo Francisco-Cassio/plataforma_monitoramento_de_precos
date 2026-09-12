@@ -175,6 +175,7 @@
 {% endblock %}
 
 {% block scripts %}
+<script>
     let priceChart = null;
     let currentModalProductId = null;
     let currentModalTitle = '';
@@ -345,7 +346,7 @@
                             <i class="fa-solid fa-arrow-up-right-from-square text-[11px]"></i>
                         </a>
 
-                        <button onclick="handleDeleteProduct(${p.id})" class="p-1.5 px-2.5 bg-rose-500/[0.05] hover:bg-rose-500/[0.15] text-rose-400 border border-rose-500/20 rounded-lg text-xs transition" title="Excluir monitoramento">
+                        <button onclick="handleDeleteProduct(${p.id}, this)" class="p-1.5 px-2.5 bg-rose-500/[0.05] hover:bg-rose-500/[0.15] text-rose-400 border border-rose-500/20 rounded-lg text-xs transition active:scale-95" title="Excluir monitoramento">
                             <i class="fa-solid fa-trash text-[11px]"></i>
                         </button>
                     </div>
@@ -401,9 +402,33 @@
         }
     }
 
-    // Exclui produto
-    async function handleDeleteProduct(productId) {
-        if (!confirm('Deseja realmente interromper o monitoramento deste produto?')) return;
+    // Exclui produto com confirmação inline de 2 toques (Sem pop-up nativo)
+    async function handleDeleteProduct(productId, btnElement) {
+        if (!btnElement) return;
+
+        // Toque 1: Entra no estado de confirmação rápida
+        if (!btnElement.dataset.confirming) {
+            btnElement.dataset.confirming = 'true';
+            btnElement.innerHTML = '<span class="text-[10px] font-mono font-medium text-rose-300 px-0.5">Excluir?</span>';
+            btnElement.classList.remove('bg-rose-500/[0.05]', 'border-rose-500/20');
+            btnElement.classList.add('bg-rose-500/20', 'border-rose-500/40');
+
+            // Cancela e restaura se não houver segundo clique em 3.5 segundos
+            const timer = setTimeout(() => {
+                delete btnElement.dataset.confirming;
+                btnElement.innerHTML = '<i class="fa-solid fa-trash text-[11px]"></i>';
+                btnElement.classList.remove('bg-rose-500/20', 'border-rose-500/40');
+                btnElement.classList.add('bg-rose-500/[0.05]', 'border-rose-500/20');
+            }, 3500);
+
+            btnElement._confirmTimer = timer;
+            return;
+        }
+
+        // Toque 2: Confirmado pelo usuário
+        if (btnElement._confirmTimer) clearTimeout(btnElement._confirmTimer);
+        btnElement.disabled = true;
+        btnElement.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-[10px]"></i>';
 
         try {
             const response = await fetch(`/api/v1/products/${productId}`, {
@@ -415,10 +440,15 @@
                 throw new Error('Falha ao remover produto.');
             }
 
-            showToast('Produto removido.', 'info');
+            showToast('Monitoramento encerrado.', 'info');
             loadProducts();
         } catch (err) {
             showToast(err.message, 'error');
+            delete btnElement.dataset.confirming;
+            btnElement.disabled = false;
+            btnElement.innerHTML = '<i class="fa-solid fa-trash text-[11px]"></i>';
+            btnElement.classList.remove('bg-rose-500/20', 'border-rose-500/40');
+            btnElement.classList.add('bg-rose-500/[0.05]', 'border-rose-500/20');
         }
     }
 
@@ -428,6 +458,7 @@
         currentModalTitle = title;
         currentModalTargetPrice = targetPrice ? Number(targetPrice) : null;
         currentModalHistory = [];
+        resetRemoveTargetButton();
 
         const modal = document.getElementById('history-modal');
         const modalContainer = document.getElementById('modal-container');
@@ -525,15 +556,43 @@
         }
     }
 
-    // Remove a meta de preço do produto pelo modal
+    let removeTargetConfirmTimer = null;
+
+    function resetRemoveTargetButton() {
+        const btnRemove = document.getElementById('modal-btn-remove-target');
+        if (!btnRemove) return;
+        if (removeTargetConfirmTimer) clearTimeout(removeTargetConfirmTimer);
+        delete btnRemove.dataset.confirming;
+        btnRemove.innerHTML = '<i class="fa-solid fa-trash text-[10px]"></i>';
+        btnRemove.classList.remove('bg-rose-500/25', 'border-rose-500/40', 'px-3');
+        btnRemove.classList.add('bg-rose-500/10', 'border-rose-500/20', 'px-2.5');
+    }
+
+    // Remove a meta de preço do produto pelo modal (Confirmação Inline de 2 toques)
     async function removeTargetPriceFromModal() {
         if (!currentModalProductId) return;
-        if (!confirm('Deseja realmente desativar o preço-alvo deste produto?')) return;
 
         const btnRemove = document.getElementById('modal-btn-remove-target');
         const inputTarget = document.getElementById('modal-input-target-price');
 
+        // Toque 1: Entra no estado de confirmação
+        if (!btnRemove.dataset.confirming) {
+            btnRemove.dataset.confirming = 'true';
+            btnRemove.innerHTML = '<span class="text-[10px] font-mono font-medium text-rose-300 px-0.5">Desativar?</span>';
+            btnRemove.classList.remove('bg-rose-500/10', 'border-rose-500/20', 'px-2.5');
+            btnRemove.classList.add('bg-rose-500/25', 'border-rose-500/40', 'px-3');
+
+            if (removeTargetConfirmTimer) clearTimeout(removeTargetConfirmTimer);
+            removeTargetConfirmTimer = setTimeout(() => {
+                resetRemoveTargetButton();
+            }, 3500);
+            return;
+        }
+
+        // Toque 2: Confirmado
+        if (removeTargetConfirmTimer) clearTimeout(removeTargetConfirmTimer);
         btnRemove.disabled = true;
+        btnRemove.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-[10px]"></i>';
 
         try {
             const response = await fetch(`/api/v1/alerts/product/${currentModalProductId}`, {
@@ -553,17 +612,19 @@
             if (targetEl) targetEl.textContent = '-';
 
             renderChart(currentModalHistory, null);
-            showToast('Preço-alvo removido.', 'info');
+            showToast('Preço-alvo desativado com sucesso.', 'info');
             loadProducts();
         } catch (err) {
             showToast(err.message, 'error');
         } finally {
             btnRemove.disabled = false;
+            resetRemoveTargetButton();
         }
     }
 
     // Fecha o modal
     function closeModal() {
+        resetRemoveTargetButton();
         const modal = document.getElementById('history-modal');
         const modalContainer = document.getElementById('modal-container');
         modal.classList.add('opacity-0');
