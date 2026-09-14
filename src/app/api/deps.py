@@ -24,23 +24,26 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession
 
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-        user_id: str = payload.get("sub")
+        user_id_raw: str = payload.get("sub")
+        token_type: str = payload.get("type")
 
-        if user_id is None:
+        if user_id_raw is None or token_type != "access":
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token inválido.",
+                detail="Token inválido ou tipo incorreto.",
                 headers={"WWW-Authenticate": "Bearer"},
             )
+
+        user_id = int(user_id_raw)
     
-    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError, ValueError):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token expirado.",
+            detail="Token inválido ou expirado.",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    user = await UserRepository(db).get_by_id(int(user_id))
+    user = await UserRepository(db).get_by_id(user_id)
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

@@ -7,6 +7,7 @@ from app.repositories.alert_repository import AlertRepository
 from app.repositories.product_repository import ProductRepository
 from app.schemas.product import ProductCreate
 from app.models.price_history import PriceHistory
+from app.core.exceptions import ProductAccessDeniedError, ProductNotFoundError
 
 
 class ProductService:
@@ -65,15 +66,9 @@ class ProductService:
         product = await self.product_repo.get_by_id(product_id)
 
         if not product:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail='Produto não encontrado.',
-            )
+            raise ProductNotFoundError("Produto não encontrado.")
         if product.user_id != user_id:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail='Você não tem permissão para acessar este produto.'
-            )
+            raise ProductAccessDeniedError("Você não tem permissão para acessar este produto.")
         return product
         
     async def list_products(self, user_id: int, skip: int = 0, limit: int = 50) -> List[MonitoredProduct]:
