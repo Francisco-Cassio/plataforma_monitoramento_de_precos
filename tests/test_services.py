@@ -3,6 +3,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+from app.core.config import settings
 from app.core.redis import get_url_lock_key
 from app.models.alert import PriceAlert
 from app.models.product import MonitoredProduct
@@ -59,9 +60,10 @@ async def test_scrape_amazon_html():
     service = ScraperService()
     html = """
     <html>
-      <head><title>Echo Dot 5 | Amazon.com.br</title></head>
+      <head><meta property="og:title" content="Kindle Paperwhite"></head>
       <body>
-        <span class="a-offscreen">R$ 399,00</span>
+        <span class="a-price-whole">499</span>
+        <span class="a-price-fraction">90</span>
         <div id="availability"><span>Em estoque</span></div>
       </body>
     </html>
@@ -72,15 +74,16 @@ async def test_scrape_amazon_html():
         mock_resp.raise_for_status = MagicMock()
         mock_get.return_value = mock_resp
 
-        data = await service.scrape_product("https://amazon.com.br/dp/B0123")
-        assert data.price == Decimal("399.00")
+        data = await service.scrape_product("https://www.amazon.com.br/dp/B08N3TCP2F")
+        assert data.price == Decimal("499.90")
+        assert data.title == "Kindle Paperwhite"
         assert data.in_stock is True
 
 
-# Deve levantar ScrapingError se o preço não for encontrado
+# Deve lançar ScrapingError se o preço não for localizado
 async def test_scrape_missing_price_raises_error():
     service = ScraperService()
-    html = "<html><body><h1>Página sem preço</h1></body></html>"
+    html = "<html><body><h1>Produto Sem Preço</h1></body></html>"
 
     with patch("httpx.AsyncClient.get") as mock_get:
         mock_resp = MagicMock()
@@ -106,7 +109,8 @@ async def test_notification_anti_spam_and_auto_rearm():
         is_triggered=False,
     )
 
-    with patch("aiosmtplib.send", new_callable=AsyncMock) as mock_send:
+    with patch.object(settings, "EMAILS_ENABLED", True), \
+         patch("aiosmtplib.send", new_callable=AsyncMock) as mock_send:
         # 1. Bateu a meta -> dispara notificação
         count1 = await service.process_product_alerts(product, Decimal("3900.00"), [alert])
         assert count1 == 1
