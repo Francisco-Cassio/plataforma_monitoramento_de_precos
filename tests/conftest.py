@@ -13,11 +13,22 @@ from app.main import app
 
 @pytest.fixture
 async def db_session() -> AsyncGenerator[AsyncSession, None]:
-    """Fornece uma sessão assíncrona isolada com NullPool para evitar conflitos de event loops."""
+    """Cria uma transação isolada com rollback automático ao fim de cada teste via savepoint."""
     engine = create_async_engine(settings.DATABASE_URL, poolclass=NullPool)
-    TestSessionLocal = async_sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
-    async with TestSessionLocal() as session:
-        yield session
+    connection = await engine.connect()
+    transaction = await connection.begin()
+    
+    session = AsyncSession(
+        bind=connection,
+        expire_on_commit=False,
+        join_transaction_mode="create_savepoint",
+    )
+    
+    yield session
+    
+    await session.close()
+    await transaction.rollback()
+    await connection.close()
     await engine.dispose()
 
 
