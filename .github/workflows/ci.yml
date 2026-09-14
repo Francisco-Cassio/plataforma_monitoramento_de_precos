@@ -39,9 +39,9 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Instalar astral-sh/uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v5
         with:
-          version: "latest"
+          enable-cache: true
 
       - name: Configurar Python 3.12
         run: uv python install 3.12
@@ -61,8 +61,3 @@ jobs:
           SECRET_KEY: test_secret_key_ci_environment
           EMAILS_ENABLED: "false"
         run: uv run pytest -v
-
-      - name: Instalar astral-sh/uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true

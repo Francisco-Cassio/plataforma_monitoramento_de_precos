@@ -22,12 +22,8 @@ dependencies = [
     "sqlalchemy[asyncio]>=2.0",
 ]
 
-[project.scripts]
-plataforma-monitoramento-de-precos = "plataforma_monitoramento_de_precos:main"
-
-[build-system]
-requires = ["uv_build>=0.12.9,<0.13.0"]
-build-backend = "uv_build"
+[tool.uv]
+package = false
 
 [dependency-groups]
 dev = [
