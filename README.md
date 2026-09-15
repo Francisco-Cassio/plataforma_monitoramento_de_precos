@@ -5,6 +5,7 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?style=flat&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=flat&logo=redis&logoColor=white)](https://redis.io/)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
+[![CI](https://img.shields.io/badge/CI-Passing-2ea44f?style=flat&logo=githubactions&logoColor=white)](https://github.com/Francisco-Cassio/plataforma_monitoramento_de_precos/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Aplicação web para acompanhar preços em lojas online (Mercado Livre, Amazon, entre outras), montar histórico de variações com gráficos e avisar por e-mail quando um produto atingir o preço desejado.
@@ -85,7 +86,7 @@ flowchart TD
 - **Coleta de Preços**: HTTPX, BeautifulSoup4
 - **E-mails**: aiosmtplib, Jinja2, Mailpit
 - **Interface**: Jinja2, Tailwind CSS, Chart.js
-- **Ambiente e Testes**: Docker, Docker Compose, uv, Pytest
+- **Ambiente, Testes e CI**: Docker, Docker Compose, uv, Pytest, GitHub Actions
 
 ---
 
@@ -155,16 +156,23 @@ docker compose exec api python -m app.scripts.seed_demo --reset
 - **Metas (`/api/v1/alerts`)**:
   - `GET /` — Lista metas ativas
   - `POST /` — Define ou atualiza preço-alvo de um produto
-  - `DELETE /{id}` — Remove meta de preço
+  - `DELETE /{id}` — Remove meta de preço por ID
+  - `DELETE /product/{product_id}` — Remove meta associada a um produto
+- **Saúde e Diagnóstico**:
+  - `GET /health` — Verificação de status e integridade da aplicação
 
 ---
 
 ## Testes automatizados
 
-Para rodar os testes da aplicação:
+A aplicação conta com uma suíte de testes unitários e de integração com isolamento automático de transações no PostgreSQL:
 
 ```bash
-docker compose exec api python -m pytest tests/test_notifications.py tests/test_services.py -v
+# Com o ambiente virtual ativado:
+pytest -v
+
+# Ou executando diretamente via uv:
+uv run pytest -v
 ```
 
 ---
@@ -173,24 +181,25 @@ docker compose exec api python -m pytest tests/test_notifications.py tests/test_
 
 ```text
 plataforma_monitoramento_de_precos/
+├── .github/                 # Workflows de CI/CD (GitHub Actions)
 ├── docker-compose.yml       # Configuração dos containers (App, Worker, BD, Redis, Mailpit)
 ├── Dockerfile               # Imagem da aplicação com Python 3.12 e uv
-├── pyproject.toml           # Dependências e metadados
+├── pyproject.toml           # Dependências e metadados (modo aplicação)
 ├── uv.lock                  # Versões travadas das dependências
 ├── README.md                # Documentação
 ├── LICENSE                  # Licença MIT
 ├── alembic/                 # Migrações do banco de dados
-├── tests/                   # Testes unitários e de integração
+├── tests/                   # Testes unitários e de integração (25 testes)
 └── src/
     └── app/
-        ├── api/             # Rotas da API REST
-        ├── core/            # Configurações, segurança e conexão com banco
-        ├── models/          # Modelos de dados (User, Product, PriceHistory, PriceAlert)
-        ├── repositories/    # Consultas ao banco de dados
-        ├── scrapers/        # Lógica de extração de preços por loja
-        ├── scripts/         # Script de dados de teste (seed)
+        ├── api/             # Rotas da API REST (v1) e injeção de dependências
+        ├── core/            # Configurações, segurança JWT, exceções e banco
+        ├── models/          # Modelos de dados ORM (User, Product, PriceHistory, PriceAlert)
+        ├── repositories/    # Consultas e persistência no PostgreSQL
+        ├── schemas/         # Schemas de validação e serialização Pydantic
+        ├── scripts/         # Script de dados de teste e demonstração (seed)
         ├── services/        # Regras de negócio (notificações, scraping, auth)
-        ├── templates/       # Telas HTML (dashboard e e-mail)
+        ├── templates/       # Telas HTML (dashboard, login e e-mails)
         ├── web/             # Rotas das páginas web do painel
         └── workers/         # Tarefas agendadas e configuração do ARQ
 ```
