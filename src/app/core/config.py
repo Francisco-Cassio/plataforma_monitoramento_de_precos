@@ -1,0 +1,36 @@
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+
+    PROJECT_NAME: str = "Vigia - Monitor de Preços"
+    VERSION: str = "0.1.0"
+    API_V1_STR: str = "/api/v1"
+
+    POSTGRES_USER: str = "postgres"
+    POSTGRES_PASSWORD: str = "postgres"
+    POSTGRES_DB: str = "price_monitor_db"
+    POSTGRES_HOST: str = "localhost"
+    POSTGRES_PORT: int = 5432
+    DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/price_monitor_db"
+
+    REDIS_HOST: str = "localhost"
+    REDIS_PORT: int = 6379
+    REDIS_URL: str = "redis://localhost:6379/0"
+
+    SECRET_KEY: str = "a9d93cb9fc447b82bfb97bb0ac776f6edb52cb667f3885fb847d0afeb3683671"
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+
+    # Configurações de Notificação por E-mail (SMTP)
+    EMAILS_ENABLED: bool = True
+    SMTP_HOST: str = "mailpit"
+    SMTP_PORT: int = 1025
+    SMTP_USER: str = ""
+    SMTP_PASSWORD: str = ""
+    SMTP_TLS: bool = False
+    EMAILS_FROM_EMAIL: str = "alertas@vigia.com"
+    EMAILS_FROM_NAME: str = "Vigia Alertas"
+
+settings = Settings()

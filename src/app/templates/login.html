@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %}Acesso &bull; Vigia{% endblock %}
+
+{% block content %}
+<div class="max-w-sm mx-auto my-14">
+    <!-- Card Principal -->
+    <div class="bg-[#121215] border border-white/[0.08] rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.4)] p-7 space-y-6">
+        
+        <!-- Cabeçalho do Card -->
+        <div class="text-center space-y-1">
+            <h1 class="text-lg font-semibold tracking-tight text-white">Acesse sua conta</h1>
+            <p class="text-xs text-zinc-400">Vigie variações de preços nas suas lojas favoritas em tempo real</p>
+        </div>
+
+        <!-- Segment Control (Abas Alternáveis) -->
+        <div class="p-1 bg-zinc-900/90 rounded-xl border border-white/[0.06] flex items-center">
+            <button id="tab-login-btn" onclick="switchTab('login')" class="flex-1 py-1.5 text-center text-xs font-medium rounded-lg bg-zinc-800 text-white shadow-sm transition duration-150">
+                Entrar
+            </button>
+            <button id="tab-register-btn" onclick="switchTab('register')" class="flex-1 py-1.5 text-center text-xs font-medium rounded-lg text-zinc-400 hover:text-zinc-200 transition duration-150">
+                Criar Conta
+            </button>
+        </div>
+
+        <!-- Formulário de Login -->
+        <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
+            <div class="space-y-1.5">
+                <label class="block text-xs font-medium text-zinc-300">E-mail</label>
+                <input type="email" id="login-email" required placeholder="nome@exemplo.com" class="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-white/[0.08] rounded-xl text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-white/25 focus:ring-1 focus:ring-white/20 text-xs transition">
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="block text-xs font-medium text-zinc-300">Senha</label>
+                <input type="password" id="login-password" required placeholder="••••••••" class="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-white/[0.08] rounded-xl text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-white/25 focus:ring-1 focus:ring-white/20 text-xs transition">
+            </div>
+
+            <button type="submit" id="login-submit-btn" class="w-full py-2.5 px-4 bg-white hover:bg-zinc-200 text-zinc-950 font-semibold rounded-xl text-xs transition active:scale-[0.98] shadow-sm flex items-center justify-center space-x-2">
+                <span>Entrar no Vigia</span>
+                <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </button>
+        </form>
+
+        <!-- Formulário de Cadastro -->
+        <form id="register-form" onsubmit="handleRegister(event)" class="space-y-4 hidden">
+            <div class="space-y-1.5">
+                <label class="block text-xs font-medium text-zinc-300">E-mail</label>
+                <input type="email" id="register-email" required placeholder="nome@exemplo.com" class="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-white/[0.08] rounded-xl text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-white/25 focus:ring-1 focus:ring-white/20 text-xs transition">
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="block text-xs font-medium text-zinc-300">Senha (mínimo 6 caracteres)</label>
+                <input type="password" id="register-password" minlength="6" required placeholder="Mínimo 6 caracteres" class="w-full px-3.5 py-2.5 bg-zinc-900/60 border border-white/[0.08] rounded-xl text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-white/25 focus:ring-1 focus:ring-white/20 text-xs transition">
+            </div>
+
+            <button type="submit" id="register-submit-btn" class="w-full py-2.5 px-4 bg-white hover:bg-zinc-200 text-zinc-950 font-semibold rounded-xl text-xs transition active:scale-[0.98] shadow-sm flex items-center justify-center space-x-2">
+                <span>Criar Conta</span>
+                <i class="fa-solid fa-check text-[10px]"></i>
+            </button>
+        </form>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Alternância limpa de abas
+    function switchTab(tab) {
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const tabLoginBtn = document.getElementById('tab-login-btn');
+        const tabRegisterBtn = document.getElementById('tab-register-btn');
+
+        const activeClasses = 'flex-1 py-1.5 text-center text-xs font-medium rounded-lg bg-zinc-800 text-white shadow-sm transition duration-150';
+        const inactiveClasses = 'flex-1 py-1.5 text-center text-xs font-medium rounded-lg text-zinc-400 hover:text-zinc-200 transition duration-150';
+
+        if (tab === 'login') {
+            loginForm.classList.remove('hidden');
+            registerForm.classList.add('hidden');
+            tabLoginBtn.className = activeClasses;
+            tabRegisterBtn.className = inactiveClasses;
+        } else {
+            loginForm.classList.add('hidden');
+            registerForm.classList.remove('hidden');
+            tabLoginBtn.className = inactiveClasses;
+            tabRegisterBtn.className = activeClasses;
+        }
+    }
+
+    // Login com autenticação OAuth2
+    async function handleLogin(event) {
+        event.preventDefault();
+        const btn = document.getElementById('login-submit-btn');
+        const email = document.getElementById('login-email').value.trim();
+        const password = document.getElementById('login-password').value;
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xs"></i><span>Autenticando...</span>';
+
+        try {
+            const formData = new URLSearchParams();
+            formData.append('username', email);
+            formData.append('password', password);
+
+            const response = await fetch('/api/v1/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.detail || 'Falha ao autenticar.');
+            }
+
+            localStorage.setItem('access_token', data.access_token);
+            showToast('Acesso autorizado.', 'success');
+            setTimeout(() => window.location.href = '/', 400);
+        } catch (err) {
+            showToast(err.message, 'error');
+            btn.disabled = false;
+            btn.innerHTML = '<span>Entrar no Vigia</span><i class="fa-solid fa-arrow-right text-[10px]"></i>';
+        }
+    }
+
+    // Cadastro
+    async function handleRegister(event) {
+        event.preventDefault();
+        const btn = document.getElementById('register-submit-btn');
+        const email = document.getElementById('register-email').value.trim();
+        const password = document.getElementById('register-password').value;
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xs"></i><span>Registrando...</span>';
+
+        try {
+            const response = await fetch('/api/v1/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.detail || 'Falha ao cadastrar conta.');
+            }
+
+            showToast('Conta criada com sucesso.', 'success');
+
+            const loginForm = new URLSearchParams();
+            loginForm.append('username', email);
+            loginForm.append('password', password);
+
+            const loginRes = await fetch('/api/v1/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: loginForm
+            });
+            const loginData = await loginRes.json();
+
+            localStorage.setItem('access_token', loginData.access_token);
+            setTimeout(() => window.location.href = '/', 400);
+        } catch (err) {
+            showToast(err.message, 'error');
+            btn.disabled = false;
+            btn.innerHTML = '<span>Criar Conta</span><i class="fa-solid fa-check text-[10px]"></i>';
+        }
+    }
+
+    // Validação de sessão existente
+    document.addEventListener('DOMContentLoaded', () => {
+        const token = localStorage.getItem('access_token');
+        if (token) {
+            fetch('/api/v1/auth/me', { headers: getAuthHeaders() })
+                .then(res => {
+                    if (res.ok) window.location.href = '/';
+                    else localStorage.removeItem('access_token');
+                })
+                .catch(() => {});
+        }
+    });
+</script>
+{% endblock %}

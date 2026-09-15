@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meta Atingida &bull; Vigia</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #09090b; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f4f4f5; -webkit-font-smoothing: antialiased;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #09090b; padding: 40px 15px;">
+        <tr>
+            <td align="center">
+                <!-- Container Principal -->
+                <table role="presentation" width="100%" max-width="600" cellspacing="0" cellpadding="0" border="0" style="max-width: 580px; width: 100%; background-color: #121215; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; overflow: hidden; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td style="padding: 28px 32px; border-bottom: 1px solid rgba(255, 255, 255, 0.06); background-color: #151519;">
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                                <tr>
+                                    <td>
+                                        <div style="display: inline-block; vertical-align: middle;">
+                                            <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background-color: #34d399; box-shadow: 0 0 10px rgba(52, 211, 153, 0.6); margin-right: 8px;"></span>
+                                            <span style="font-size: 16px; font-weight: 700; color: #ffffff; letter-spacing: -0.5px;">Vigia</span>
+                                            <span style="font-size: 11px; font-family: monospace; background-color: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 4px; color: #a1a1aa; margin-left: 8px;">Alerta de Preço</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Corpo Principal -->
+                    <tr>
+                        <td style="padding: 32px;">
+                            <!-- Tag de Sucesso -->
+                            <div style="margin-bottom: 16px;">
+                                <span style="display: inline-block; font-size: 12px; font-weight: 600; font-family: monospace; color: #34d399; background-color: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.25); padding: 4px 10px; border-radius: 6px;">
+                                    &bull; Preço-Alvo Atingido
+                                </span>
+                            </div>
+
+                            <h1 style="font-size: 20px; font-weight: 600; line-height: 1.4; color: #ffffff; margin: 0 0 24px 0;">
+                                O produto que você está vigiando atingiu a sua meta!
+                            </h1>
+
+                            <!-- Card do Produto -->
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #18181c; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; margin-bottom: 28px;">
+                                <tr>
+                                    <td style="padding: 20px;">
+                                        <p style="font-size: 14px; font-weight: 500; color: #e4e4e7; margin: 0 0 16px 0; line-height: 1.4;">
+                                            {{ product_title }}
+                                        </p>
+
+                                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="border-top: 1px solid rgba(255, 255, 255, 0.06); padding-top: 16px;">
+                                            <tr>
+                                                <td width="50%" style="vertical-align: bottom;">
+                                                    <span style="font-size: 11px; font-family: monospace; text-transform: uppercase; color: #71717a; display: block; margin-bottom: 4px;">Preço Atual</span>
+                                                    <span style="font-size: 24px; font-weight: 700; font-family: monospace; color: #34d399; letter-spacing: -0.5px;">{{ current_price_formatted }}</span>
+                                                </td>
+                                                <td width="50%" align="right" style="vertical-align: bottom;">
+                                                    <span style="font-size: 11px; font-family: monospace; text-transform: uppercase; color: #71717a; display: block; margin-bottom: 4px;">Sua Meta</span>
+                                                    <span style="font-size: 15px; font-weight: 500; font-family: monospace; color: #a1a1aa;">{{ target_price_formatted }}</span>
+                                                    {% if savings_formatted %}
+                                                    <span style="display: block; font-size: 11px; font-family: monospace; color: #34d399; margin-top: 2px;">
+                                                        Economia: {{ savings_formatted }}
+                                                    </span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Botão CTA -->
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                                <tr>
+                                    <td align="center">
+                                        <a href="{{ product_url }}" target="_blank" style="display: inline-block; width: 100%; box-sizing: border-box; background-color: #ffffff; color: #09090b; font-size: 14px; font-weight: 600; text-align: center; text-decoration: none; padding: 14px 24px; border-radius: 10px; letter-spacing: -0.2px;">
+                                            Aproveitar Oferta na Loja &rarr;
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <p style="font-size: 12px; color: #71717a; text-align: center; margin: 20px 0 0 0; line-height: 1.4;">
+                                Os preços podem mudar a qualquer momento no e-commerce conforme a disponibilidade do estoque.
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 20px 32px; background-color: #0d0d10; border-top: 1px solid rgba(255, 255, 255, 0.04); text-align: center;">
+                            <p style="font-size: 11px; color: #52525b; margin: 0; line-height: 1.5;">
+                                Você recebeu esta notificação porque cadastrou uma meta de monitoramento no <strong>Vigia</strong>.<br>
+                                Gerencie seus alertas acessando o seu painel de controle.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+
