@@ -17,8 +17,8 @@ oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_V1_STR}/auth/login"
 )
 
-async def get_user_service(dv: AsyncSession = Depends(get_db)) -> AuthService:
-    return AuthService(UserRepository(dv))
+async def get_user_service(db: AsyncSession = Depends(get_db)) -> AuthService:
+    return AuthService(UserRepository(db))
 
 async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)) -> User:
 
