@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     REDIS_PORT: int = 6379
     REDIS_URL: str = "redis://localhost:6379/0"
 
-    SECRET_KEY: str = "sua_chave_secreta_super_segura_aqui_para_desenvolvimento"
+    SECRET_KEY: str = "a9d93cb9fc447b82bfb97bb0ac776f6edb52cb667f3885fb847d0afeb3683671"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
